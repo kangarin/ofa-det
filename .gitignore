@@ -1,0 +1,6 @@
+.torch/
+__pycache__/
+logs/
+*.pth
+*.pt
+*.db
