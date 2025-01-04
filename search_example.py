@@ -11,10 +11,10 @@ import torchvision.transforms as transforms
 if __name__ == '__main__':
     from models.backbone.ofa_supernet import get_ofa_supernet_mbv3_w12
     model = get_ofa_supernet_mbv3_w12()
-    study_name = "mbv3_w12"
+    study_name = "ofa_supernet_mbv3_w12_mac"
     study = create_study(study_name)
-    n_trials = 100
-    # run_study(model, study, n_trials, 'cpu', [240, 360, 480, 600, 720], 'ofa_supernet_mbv3_w12')
+    n_trials = 1000
+    run_study(model, study, n_trials, 'cpu', [240, 360, 480, 600, 720], 'ofa_supernet_mbv3_w12')
 
     arch_list = get_optimal_architecture(study, 'ofa_supernet_mbv3_w12', [240, 360, 480, 600, 720])
 
