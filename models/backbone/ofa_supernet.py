@@ -1,13 +1,23 @@
 import torch
 
+# def get_ofa_supernet_mbv3_w10():
+#     return torch.hub.load('mit-han-lab/once-for-all', 'ofa_supernet_mbv3_w10', pretrained=True)
+
+# def get_ofa_supernet_mbv3_w12():
+#     return torch.hub.load('mit-han-lab/once-for-all', 'ofa_supernet_mbv3_w12', pretrained=True)
+
+# def get_ofa_supernet_resnet50():
+#     return torch.hub.load('mit-han-lab/once-for-all', 'ofa_supernet_resnet50', pretrained=True)
+
 def get_ofa_supernet_mbv3_w10():
-    return torch.hub.load('mit-han-lab/once-for-all', 'ofa_supernet_mbv3_w10', pretrained=True)
+    return torch.hub.load('./once-for-all', 'ofa_supernet_mbv3_w10', pretrained=True, force_reload=False, source='local')
 
 def get_ofa_supernet_mbv3_w12():
-    return torch.hub.load('mit-han-lab/once-for-all', 'ofa_supernet_mbv3_w12', pretrained=True)
+    return torch.hub.load('./once-for-all', 'ofa_supernet_mbv3_w12', pretrained=True, force_reload=False, source='local')
 
 def get_ofa_supernet_resnet50():
-    return torch.hub.load('mit-han-lab/once-for-all', 'ofa_supernet_resnet50', pretrained=True)
+    return torch.hub.load('./once-for-all', 'ofa_supernet_resnet50', pretrained=True, force_reload=False, source='local')
+
 
 def get_architecture_dict(ofa_supernet_name: str):
     assert ofa_supernet_name in ["ofa_supernet_mbv3_w10", "ofa_supernet_mbv3_w12", "ofa_supernet_resnet50"]

@@ -4,6 +4,8 @@ if __name__ == '__main__':
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
+    from models.backbone.ofa_supernet import get_ofa_supernet_mbv3_w10
+    model = get_ofa_supernet_mbv3_w10()
     from models.backbone.ofa_supernet import get_ofa_supernet_mbv3_w12
     model = get_ofa_supernet_mbv3_w12()
 

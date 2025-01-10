@@ -12,9 +12,11 @@ import torch
 import numpy as np
 import time
 from models.detection.fasterrcnn import get_faster_rcnn
+from models.backbone.ofa_supernet import get_ofa_supernet_mbv3_w12
+from models.fpn.ofa_supernet_mbv3_w12_fpn import Mbv3W12Fpn
 
 # 初始化模型
-model = get_faster_rcnn()
+model = get_faster_rcnn(Mbv3W12Fpn(get_ofa_supernet_mbv3_w12()))
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 model.eval()

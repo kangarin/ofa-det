@@ -1,3 +1,9 @@
+# 把项目根目录添加到Python路径中
+import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
 import asyncio
 import websockets
 import json
@@ -12,6 +18,8 @@ from torchvision import transforms
 from utils.bn_calibration import set_running_statistics
 import torch
 from search.custom_sampler import CustomNSGAIISampler
+from models.fpn.ofa_supernet_mbv3_w12_fpn import Mbv3W12Fpn
+from models.backbone.ofa_supernet import get_ofa_supernet_mbv3_w12
 
 # 全局变量存储WebSocket连接
 client_websocket = None
@@ -87,7 +95,7 @@ class ArchSearchOFADetection:
 
         return objective1, objective2
 
-async def handle_client(websocket, path):
+async def handle_client(websocket, path=None):
     """处理客户端连接"""
     global client_websocket
     client_websocket = websocket
@@ -145,10 +153,10 @@ async def main():
         sampler=CustomNSGAIISampler()
     )
     
-    model = get_faster_rcnn()
-    import torch
-    model = torch.load('ofa_mbv3_w12_fasterrcnn_kd_40_mini_epoch.pth')
-    await run_study(model, study, 5000, 'cuda', [240, 360, 480, 600, 720], 'ofa_supernet_mbv3_w12')
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    model = get_faster_rcnn(Mbv3W12Fpn(get_ofa_supernet_mbv3_w12()))
+    model = torch.load('ofa_mbv3_w12_fasterrcnn_kd4.pth', map_location=device)
+    await run_study(model, study, 5000, 'cpu', [240, 360, 480, 600, 720], 'ofa_supernet_mbv3_w12')
     
     # 保持服务器运行直到实验完成
     await server.wait_closed()
