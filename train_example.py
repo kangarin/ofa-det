@@ -1,5 +1,6 @@
 
-from train.train_detection_networks_with_kd import train
+from train.train_detection_networks_with_kd_checkpoints import train
+# from train.train_detection_networks_random_checkpoints import train
 from models.detection.fasterrcnn import get_faster_rcnn
 from models.backbone.ofa_supernet import get_max_net_config, get_min_net_config
 from models.backbone.ofa_supernet import get_ofa_supernet_mbv3_w12
@@ -22,5 +23,7 @@ for name, param in model.named_parameters():
 import os
 # if os.path.exists('ofa_mbv3_w12_fasterrcnn_adam.pth'):
 #     model = torch.load('ofa_mbv3_w12_fasterrcnn_adam.pth')
-train(model, 10, 'ofa_mbv3_w12_fasterrcnn_kd.pth', max_net_config, min_net_config, batch_size=1)
+train(model, 10, 'ofa_mbv3_w12_fasterrcnn_kd.pth', max_net_config, min_net_config, batch_size=1,
+      backbone_learning_rate=1e-4, head_learning_rate=1e-4, 
+          min_backbone_lr=1e-4, min_head_lr=1e-4, resume_from=None)
 model = torch.load('ofa_mbv3_w12_fasterrcnn_kd.pth')
