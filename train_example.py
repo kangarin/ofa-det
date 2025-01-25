@@ -23,7 +23,10 @@ for name, param in model.named_parameters():
 import os
 # if os.path.exists('ofa_mbv3_w12_fasterrcnn_adam.pth'):
 #     model = torch.load('ofa_mbv3_w12_fasterrcnn_adam.pth')
-train(model, 10, 'ofa_mbv3_w12_fasterrcnn_kd.pth', max_net_config, min_net_config, batch_size=1,
-      backbone_learning_rate=1e-4, head_learning_rate=1e-4, 
+train(model, 200, 'ofa_mbv3_w12_fasterrcnn_kd_ckpt_200_mini.pth', max_net_config, min_net_config, batch_size=1,
+      backbone_learning_rate=1e-3, head_learning_rate=1e-3, 
           min_backbone_lr=1e-4, min_head_lr=1e-4, resume_from=None)
-model = torch.load('ofa_mbv3_w12_fasterrcnn_kd.pth')
+
+# train(model, 350, 'ofa_mbv3_w12_fasterrcnn_kd_ckpt_350_mini.pth', max_net_config, min_net_config, batch_size=1,
+#       backbone_learning_rate=5e-5, head_learning_rate=5e-5, 
+#           min_backbone_lr=5e-5, min_head_lr=5e-5, resume_from='ofa_mbv3_w12_fasterrcnn_kd_ckpt_300_mini.pth', load_optimizer_scheduler=False)

@@ -43,7 +43,8 @@ def train(model, num_epochs, save_path, max_net_config, min_net_config,
           min_backbone_lr=1e-4, min_head_lr=1e-4,  
           subnet_sample_interval=5,
           distill_alpha=5.0,
-          resume_from=None):
+          resume_from=None,
+          load_optimizer_scheduler=True):
     """训练检测网络，使用sandwich rule采样并添加FPN蒸馏"""
     # 设置TensorBoard
     writer = SummaryWriter('runs/detection_train_kd')
@@ -71,22 +72,46 @@ def train(model, num_epochs, save_path, max_net_config, min_net_config,
 
     # 初始化开始轮次
     start_epoch = 0
-    
-    # 加载检查点（如果存在）
-    if resume_from is not None and os.path.exists(resume_from):
-        checkpoint = torch.load(resume_from)
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer_backbone.load_state_dict(checkpoint['optimizer_backbone_state_dict'])
-        optimizer_head.load_state_dict(checkpoint['optimizer_head_state_dict'])
-        scheduler_backbone.load_state_dict(checkpoint['scheduler_backbone_state_dict'])
-        scheduler_head.load_state_dict(checkpoint['scheduler_head_state_dict'])
-        start_epoch = checkpoint['epoch']
-        logger.info(f"Resumed from epoch {start_epoch}")
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     logger.info(f"Start training, using device: {device}")
     model.to(device)
 
+    if resume_from is not None and os.path.exists(resume_from):
+        checkpoint = torch.load(resume_from, map_location=device)
+        
+        # 1. 先将模型移到目标设备
+        model = model.to(device)
+        
+        # 2. 加载模型权重
+        model.load_state_dict(checkpoint['model_state_dict'])
+        
+        # 3. 重新初始化优化器(这样可以确保优化器状态在正确的设备上)
+        params_backbone = [p for p in model.backbone.parameters() if p.requires_grad]
+        if hasattr(model, 'head'):
+            params_head = [p for p in model.head.parameters() if p.requires_grad]
+        elif hasattr(model, 'roi_heads'):
+            params_head = [p for p in model.roi_heads.parameters() if p.requires_grad] + \
+                        [p for p in model.rpn.parameters() if p.requires_grad]
+
+        params_backbone = [{'params': params_backbone, 'lr': backbone_learning_rate}]
+        params_head = [{'params': params_head, 'lr': head_learning_rate}]
+        
+        optimizer_backbone = torch.optim.SGD(params_backbone, lr=backbone_learning_rate, momentum=0.9)
+        optimizer_head = torch.optim.SGD(params_head, lr=head_learning_rate, momentum=0.9)
+
+        if load_optimizer_scheduler:
+        
+            # 4. 然后加载优化器状态
+            optimizer_backbone.load_state_dict(checkpoint['optimizer_backbone_state_dict'])
+            optimizer_head.load_state_dict(checkpoint['optimizer_head_state_dict'])
+            
+            # 5. 加载调度器状态
+            scheduler_backbone.load_state_dict(checkpoint['scheduler_backbone_state_dict'])
+            scheduler_head.load_state_dict(checkpoint['scheduler_head_state_dict'])
+
+    start_epoch = checkpoint['epoch']
+    
     # 准备数据集和数据加载器
     calib_dataset = get_calib_dataset(custom_transform=transforms.Compose(common_transform_list))
     calib_dataloader = create_fixed_size_dataloader(calib_dataset, 10)

@@ -10,14 +10,19 @@ from inference.detection_inference import DetectionInference
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 model = get_faster_rcnn(Mbv3W12Fpn(get_ofa_supernet_mbv3_w12()))
 model = torch.load('ofa_mbv3_w12_fasterrcnn_kd4.pth', map_location=device)
+
+# checkpoint = torch.load('ofa_mbv3_w12_fasterrcnn_kd_ckpt_350_mini.pth', map_location=device)
+# model.load_state_dict(checkpoint['model_state_dict'])
+
 model.eval()
 detection_inference = DetectionInference(model, device)
 
 with torch.no_grad():
 
-    # image_path1 = "C:\\Users\\wydai\\Downloads\\ladwa-40.png"
-    image_path1 = "/Users/wenyidai/Development/datasets/coco2017/val2017/000000124798.jpg"
-    image_path2 = "/Users/wenyidai/Development/datasets/coco2017/val2017/000000142238.jpg"
+    image_path1 = "D:\\Projects\\coco2017\\val2017\\000000512564.jpg"
+    image_path2 = "D:\\Projects\\coco2017\\val2017\\000000153229.jpg"
+    # image_path1 = "/Users/wenyidai/Development/datasets/coco2017/val2017/000000124798.jpg"
+    # image_path2 = "/Users/wenyidai/Development/datasets/coco2017/val2017/000000142238.jpg"
 
     for i in range(10):
         subnet_config = model.backbone.body.sample_active_subnet()
@@ -44,7 +49,7 @@ with torch.no_grad():
         img = resize_images([img1, img2])
 
         # 推理
-        batch_boxes, batch_labels, batch_scores = detection_inference.detect(img, 0.5)
+        batch_boxes, batch_labels, batch_scores = detection_inference.detect(img, 0.2)
 
         # 显示原始图像和检测结果
         for orig_img, boxes, labels, scores in zip(original_images, batch_boxes, batch_labels, batch_scores):
