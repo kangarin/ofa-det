@@ -17,7 +17,8 @@ from datasets.common_transform import common_transform_list
 from torchvision import transforms
 from utils.bn_calibration import set_running_statistics
 import torch
-from search.custom_sampler import CustomNSGAIISampler
+# from search.custom_sampler import CustomNSGAIISampler
+from optuna.samplers import NSGAIISampler
 from models.fpn.ofa_supernet_mbv3_w12_fpn import Mbv3W12Fpn
 from models.backbone.ofa_supernet import get_ofa_supernet_mbv3_w12
 
@@ -150,7 +151,10 @@ async def main():
         storage="sqlite:///search_mbv3_w12_fasterrcnn_remote_tx2_eval_on_det_net.db",
         directions=["maximize", "minimize"],
         load_if_exists=True,
-        sampler=CustomNSGAIISampler()
+        # sampler=CustomNSGAIISampler()
+        sampler=NSGAIISampler(population_size=100,    
+                              mutation_prob=0.2,    
+                              crossover_prob=0.7)
     )
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')

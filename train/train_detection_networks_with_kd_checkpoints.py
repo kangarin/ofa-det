@@ -110,7 +110,7 @@ def train(model, num_epochs, save_path, max_net_config, min_net_config,
             scheduler_backbone.load_state_dict(checkpoint['scheduler_backbone_state_dict'])
             scheduler_head.load_state_dict(checkpoint['scheduler_head_state_dict'])
 
-    start_epoch = checkpoint['epoch']
+        start_epoch = checkpoint['epoch']
     
     # 准备数据集和数据加载器
     calib_dataset = get_calib_dataset(custom_transform=transforms.Compose(common_transform_list))

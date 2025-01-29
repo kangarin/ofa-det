@@ -17,7 +17,8 @@ from datasets.common_transform import common_transform_with_normalization_list
 from torchvision import transforms
 from utils.bn_calibration import set_running_statistics
 import torch
-from search.custom_sampler import CustomNSGAIISampler
+# from search.custom_sampler import CustomNSGAIISampler
+from optuna.samplers import NSGAIISampler
 
 # 全局变量存储WebSocket连接
 client_websocket = None
@@ -145,7 +146,10 @@ async def main():
         storage="sqlite:///search_mbv3_remote_tx2.db",
         directions=["maximize", "minimize"],
         load_if_exists=True,
-        sampler=CustomNSGAIISampler()
+        # sampler=CustomNSGAIISampler()
+        sampler=NSGAIISampler(population_size=100,    
+                        mutation_prob=0.2,    
+                        crossover_prob=0.7)
     )
     
     model = get_ofa_supernet_mbv3_w12()
