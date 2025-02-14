@@ -9,10 +9,13 @@ from inference.detection_inference import DetectionInference
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 model = get_faster_rcnn(Mbv3W12Fpn(get_ofa_supernet_mbv3_w12()))
-model = torch.load('server_ofa_mbv3_w12_fasterrcnn_kd_ckpt_200_mini_extracted.pth', map_location=device)
+model = torch.load('server_ofa_mbv3_w12_fasterrcnn_kd_ckpt_500_mini_full_net_extracted.pth', map_location=device)
+# model = torch.load('single_subnet.pth', map_location=device)
 
 # checkpoint = torch.load('server_ofa_mbv3_w12_fasterrcnn_kd_ckpt_200_mini.pth', map_location=device)
 # model.load_state_dict(checkpoint['model_state_dict'])
+
+from utils.bn_calibration import save_bn_statistics
 
 model.eval()
 detection_inference = DetectionInference(model, device)
@@ -26,7 +29,9 @@ with torch.no_grad():
 
     for i in range(10):
         subnet_config = model.backbone.body.sample_active_subnet()
+        # subnet_config = {'ks': [5, 7, 5, 3, 5, 3, 7, 7, 5, 7, 3, 3, 3, 3, 7, 5, 5, 5, 5, 3], 'e': [6, 6, 6, 4, 3, 6, 3, 3, 4, 3, 4, 4, 6, 6, 4, 6, 4, 4, 3, 3], 'd': [2, 2, 2, 2, 2]}
         detection_inference.set_active_subnet(**subnet_config)
+        save_bn_statistics(model, f'net{i}_bn.pth')
         print(subnet_config)
 
         # from evaluation.detection_accuracy_eval import eval_accuracy
@@ -49,7 +54,7 @@ with torch.no_grad():
         img = resize_images([img1, img2])
 
         # 推理
-        batch_boxes, batch_labels, batch_scores = detection_inference.detect(img, 0.3)
+        batch_boxes, batch_labels, batch_scores = detection_inference.detect(img, 0.5)
 
         # 显示原始图像和检测结果
         for orig_img, boxes, labels, scores in zip(original_images, batch_boxes, batch_labels, batch_scores):

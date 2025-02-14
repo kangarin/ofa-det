@@ -12,6 +12,7 @@ import os
 logger = setup_logger('train')
 
 def train(model, num_epochs, save_path, max_net_config, min_net_config,
+          tensorboard_log_dir='runs/detection_train',
           batch_size=1, 
           backbone_learning_rate=1e-3, head_learning_rate=1e-3, 
           min_backbone_lr=1e-4, min_head_lr=1e-4,  
@@ -53,7 +54,7 @@ def train(model, num_epochs, save_path, max_net_config, min_net_config,
     )
 
     # 设置Tensorboard
-    writer = SummaryWriter('runs/detection_train')
+    writer = SummaryWriter(tensorboard_log_dir)
 
     # 设置起始epoch
     start_epoch = 0

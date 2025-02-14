@@ -38,7 +38,7 @@ def fpn_distill_loss(teacher_fpn, student_fpn):
     return dist_loss
 
 def train(model, num_epochs, save_path, max_net_config, min_net_config,
-          tensorboard_log_dir='runs/detection_train_random',
+          tensorboard_log_dir='runs/detection_train_kd_no_min',
           batch_size=1, 
           backbone_learning_rate=1e-3, head_learning_rate=1e-3, 
           min_backbone_lr=1e-4, min_head_lr=1e-4,  
@@ -153,10 +153,10 @@ def train(model, num_epochs, save_path, max_net_config, min_net_config,
                         current_subnet = max_net_config
                         ofa_network.set_active_subnet(**current_subnet)
                         logger.info("Using max network")
-                    elif sandwich_counter % 10 == 1:
-                        current_subnet = min_net_config
-                        ofa_network.set_active_subnet(**current_subnet)
-                        logger.info("Using min network")
+                    # elif sandwich_counter % 10 == 1:
+                    #     current_subnet = min_net_config
+                    #     ofa_network.set_active_subnet(**current_subnet)
+                    #     logger.info("Using min network")
                     else:
                         current_subnet = ofa_network.sample_active_subnet()
                         ofa_network.set_active_subnet(**current_subnet)

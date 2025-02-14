@@ -21,6 +21,6 @@ def extract_model(ckpt_path, model):
     
     return save_path
 
-ckpt_path = 'server_ofa_mbv3_w12_fasterrcnn_kd_ckpt_200_mini.pth'
+ckpt_path = 'server_ofa_mbv3_w12_fasterrcnn_kd_ckpt_500_mini_full_net.pth'
 model = get_faster_rcnn(Mbv3W12Fpn(get_ofa_supernet_mbv3_w12()))
 save_path = extract_model(ckpt_path, model)
