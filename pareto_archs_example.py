@@ -10,33 +10,26 @@ from inference.detection_inference import DetectionInference
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 model = get_faster_rcnn(Mbv3W12Fpn(get_ofa_supernet_mbv3_w12()))
 model = torch.load('server_ofa_mbv3_w12_fasterrcnn_kd_ckpt_500_mini_full_net_extracted.pth', map_location=device)
-# model = torch.load('single_subnet.pth', map_location=device)
-
-# checkpoint = torch.load('server_ofa_mbv3_w12_fasterrcnn_kd_ckpt_200_mini.pth', map_location=device)
-# model.load_state_dict(checkpoint['model_state_dict'])
 
 from utils.bn_calibration import save_bn_statistics
 
 model.eval()
 detection_inference = DetectionInference(model, device)
 
+from pareto_best_archs import pareto_best_archs
+
 with torch.no_grad():
 
-    # image_path1 = "D:\\Projects\\coco2017\\val2017\\000000512564.jpg"
-    # image_path2 = "D:\\Projects\\coco2017\\val2017\\000000153229.jpg"
     image_path1 = "/Users/wenyidai/Development/datasets/coco2017/val2017/000000124798.jpg"
     image_path2 = "/Users/wenyidai/Development/datasets/coco2017/val2017/000000142238.jpg"
 
-    for i in range(10):
-        subnet_config = model.backbone.body.sample_active_subnet()
-        subnet_config = {'ks': [3, 3, 3, 3, 5, 7, 3, 7, 3, 7, 7, 7, 3, 7, 7, 5, 3, 5, 3, 3], 'e': [6, 4, 6, 6, 6, 4, 6, 4, 6, 6, 6, 6, 6, 6, 6, 3, 6, 3, 6, 3], 'd': [3, 4, 2, 2, 3]}
-    
+
+
+    for i in range(len(pareto_best_archs)):
+        subnet_config = pareto_best_archs[i]
         detection_inference.set_active_subnet(**subnet_config)
         save_bn_statistics(model, f'net{i}_bn.pth')
         print(subnet_config)
-
-        # from evaluation.detection_accuracy_eval import eval_accuracy
-        # eval_accuracy(model, 640, 100, device)
 
         # 保存原始图像用于显示
         pil_img1 = Image.open(image_path1).convert("RGB")
@@ -94,8 +87,8 @@ with torch.no_grad():
 
 with torch.no_grad():
     # 采样十个网络，各推理10次，看时延
-    for i in range(10):
-        subnet_config = model.backbone.body.sample_active_subnet()
+    for i in range(len(pareto_best_archs)):
+        subnet_config = pareto_best_archs[i]
         detection_inference.set_active_subnet(**subnet_config)
         print(subnet_config)
 
